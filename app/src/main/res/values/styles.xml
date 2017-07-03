@@ -1,0 +1,48 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textViewStyle">@style/RobotoCondensed</item>
+        <item name="android:buttonStyle">@style/RobotoCondensedButton</item>
+    </style>
+
+    <style name="RobotoCondensed" parent="android:Widget.TextView">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="RobotoCondensedButton" parent="android:Widget.Button">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="coloredButtons" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@color/blue_500</item>
+        <item name="android:colorPressedHighlight">@color/indigo_500</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:padding">5sp</item>-
+    </style>
+
+    <style name="buttonspersonalise" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="android:layout_width">90dp</item>
+        <item name="android:layout_height">90dp</item>
+        <item name="android:background">@null</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@mipmap/ic_brightness_1_black_24dp</item>
+    </style>
+
+</resources>

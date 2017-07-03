@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MePOS finder</string>
+    <string name="app_button">Find</string>
+</resources>
