@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.uniquesecure.meposconnect.MePOS;
 import com.uniquesecure.meposconnect.MePOSColorCodes;
 import com.uniquesecure.meposconnect.MePOSConnectionType;
 
@@ -119,13 +120,14 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
                     this.publishProgress(i);
                     mePOS_Socket = new Socket();
                     try {
-                        mePOS_Socket.connect((new InetSocketAddress(ipToLookUp, port)), 60);
+                        mePOS_Socket.connect((new InetSocketAddress(ipToLookUp, port)), 40);
                         String[] address = mePOS_Socket.getRemoteSocketAddress().toString().split(":");
                         foundAddress = address[0];
                         foundAddress = foundAddress.replace("/", "");
                         mePOS_Socket.close();
-                        swapColor();
-                        findMePOSWiFi(foundAddress);
+                        if (isMePOSOnIp(ipToLookUp)) {
+                            registerMePOS(foundAddress);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -151,10 +153,17 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
 
             }
         }
+
+        private boolean isMePOSOnIp(String ipAddress) {
+            MePOS mepos = new MePOS(Main.this, MePOSConnectionType.WIFI);
+            mepos.getConnectionManager().setConnectionIPAddress(ipAddress);
+            return mepos.isMePOSConnected();
+        }
     }
 
 
-    public void findMePOSWiFi(String ipFound) {
+    public void registerMePOS(String ipFound) {
+        swapColor();
         MePOSSingleton.createInstance(getApplicationContext(), MePOSConnectionType.WIFI);
         MePOSSingleton.getInstance().getConnectionManager().setConnectionIPAddress(ipFound);
         MePOSSingleton.getInstance().setCosmeticLedCol(meposCurrentColor);
