@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.Formatter;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -20,6 +22,8 @@ import com.uniquesecure.meposconnect.MePOSConnectionType;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import butterknife.BindView;
@@ -37,10 +41,12 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
     ProgressBar mProgressBar;
     @BindView(R.id.buttonScan)
     Button mButtonScan;
-    @BindView(R.id.text_device)
-    TextView mTextDevice;
+    @BindView(R.id.list_devices)
+    ListView mListDevices;
     String foundAddress;
 
+    String[] devices = new String[0];
+    ArrayList<String> list = new ArrayList<>(Arrays.asList(devices));
 
     private Boolean isScanning = false;
     private int meposCurrentColor = 0;
@@ -62,10 +68,11 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         mProgressBar.setMax(255);
-
         mButtonScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                onMePOSFinderStarted();
+                list.clear();
                 startScanMePOS();
                 mProgressBar.setVisibility(View.VISIBLE);
 
@@ -75,36 +82,42 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
 
     public void startScanMePOS() {
         isScanning = true;
-
         ScanUSBAsync scanMePOSUSB = new ScanUSBAsync();
         scanMePOSUSB.execute();
         ScanMePOSTCP scanMePOSTCP = new ScanMePOSTCP();
         scanMePOSTCP.execute();
     }
 
-    @Override
     public void onMePOSFinderStarted() {
-
     }
 
-    @Override
+
     public void onMePOSFinderProgress(int progress) {
 
     }
 
-    @Override
+
     public void onMePOSFound(MePOSDevice device) {
+        String type = device.getType();
+        String ip = device.getIpAddress();
+        if (ip!=null){
+            list.add("Found mepos Over " + type + " Ip Address "+ ip);
+        }else {
+            list.add("Found mepos Over " + type);
+        }
+
+        updateList();
     }
 
-    @Override
+
     public void onMePOSFinderCompleted() {
 
     }
 
-    @Override
     public void onMePOSFinderError(Exception e) {
 
     }
+
 
     public class ScanMePOSTCP extends AsyncTask<String, Integer, Boolean> {
         Socket mePOS_Socket;
@@ -120,7 +133,7 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
                     this.publishProgress(i);
                     mePOS_Socket = new Socket();
                     try {
-                        mePOS_Socket.connect((new InetSocketAddress(ipToLookUp, port)), 40);
+                        mePOS_Socket.connect((new InetSocketAddress(ipToLookUp, port)), 60);
                         String[] address = mePOS_Socket.getRemoteSocketAddress().toString().split(":");
                         foundAddress = address[0];
                         foundAddress = foundAddress.replace("/", "");
@@ -173,7 +186,7 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        MePOSDevice mePOSDeviceWifi = new MePOSDevice();
+        final MePOSDevice mePOSDeviceWifi = new MePOSDevice();
         mePOSDeviceWifi.setType("WIFI");
         mePOSDeviceWifi.setSerialNumber(serialNumber);
         mePOSDeviceWifi.setIpAddress(ipFound);
@@ -182,7 +195,7 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
             @Override
             public void run() {
                 if (finalSerialNumber != null)
-                    mTextDevice.setText("Found mepos Over WiFi\n" + finalSerialNumber);
+                onMePOSFound(mePOSDeviceWifi);
             }
         });
 
@@ -196,6 +209,13 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
             findMePOSUSB();
             return null;
         }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+        }
+
+
     }
 
     protected void findMePOSUSB() {
@@ -203,14 +223,14 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
         HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
         for (UsbDevice device : deviceList.values()) {
             if (isAMePOS(device)) {
-                MePOSDevice mePOSDeviceUSB = new MePOSDevice();
+                final MePOSDevice mePOSDeviceUSB = new MePOSDevice();
                 mePOSDeviceUSB.setType("USB");
-                mePOSDeviceUSB.setIpAddress("N/A");
+                mePOSDeviceUSB.setIpAddress(null);
                 mePOSDeviceUSB.setSerialNumber(device.getSerialNumber());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mTextDevice.setText("Found mepos Over USB");
+                        onMePOSFound(mePOSDeviceUSB);
                     }
                 });
             }
@@ -234,5 +254,12 @@ public class Main extends AppCompatActivity implements MePOSFinderCallback {
         if (meposCurrentColor > MePOSColorCodes.COSMETIC_WHITE) {
             meposCurrentColor = MePOSColorCodes.COSMETIC_BLUE;
         }
+    }
+
+    public void updateList(){
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(Main.this, android.R.layout.simple_list_item_1, list);
+        adapter.notifyDataSetChanged();
+        mListDevices.setAdapter(adapter);
+
     }
 }
