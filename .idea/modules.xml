@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MePOSfinder.iml" filepath="$PROJECT_DIR$/MePOSfinder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/MePOS-finder.iml" filepath="$PROJECT_DIR$/.idea/MePOS-finder.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
